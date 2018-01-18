@@ -13,10 +13,30 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Shared">
+      <UniqueIdentifier>{a12d215a-d80c-4c26-b5e0-814b59d1b824}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Client.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\Raknet-Shared\MessageCodes.h">
+      <Filter>Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Raknet-Shared\ClientInformation.h">
+      <Filter>Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="Client.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Raknet-Shared\Utility.h">
+      <Filter>Shared</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
