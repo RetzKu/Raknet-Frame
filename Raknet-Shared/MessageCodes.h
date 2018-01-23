@@ -6,4 +6,5 @@ enum CustomMessages
 	USERNAME_FOR_GUID,
 	PLAYER_COORD,
 	MOUSE_COORD,
+
 };

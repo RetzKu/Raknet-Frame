@@ -44,5 +44,8 @@
     <ClInclude Include="UserDatabase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\Raknet-Shared\UserVariables.h">
+      <Filter>Shared</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

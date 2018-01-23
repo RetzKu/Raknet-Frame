@@ -4,9 +4,11 @@
 #include <WinSock2.h>
 #include <Windows.h>
 #include <sstream>
+#include <chrono>
 
 #include "MessageCodes.h"
 #include "UserDatabase.h"
+#include "UserVariables.h"
 //#include "Utility.h"
 
 /*Including basic raknet headeres*/
@@ -25,7 +27,12 @@ public:
 	Server(string IP, int Port);
 	~Server();
 	void ServerStart();
-	void ServerLoop();
+	void ServerStop();
+	void ServerUpdate();
+	void CheckPacket(const RakNet::Packet P);
+	bool AskForVariable(CustomMessages var, INT64 guid);
+	bool AskForVariable(CustomMessages var, string username);
+	void RequestFromAll(CustomMessages var);
 
 private:
 	RakNet::Packet* Packet;
@@ -41,4 +48,9 @@ private:
 	int MaxConnections = 10; 
 
 	bool State = true;
+	string Result;
+
+	/*Tickrates*/
+	chrono::time_point<chrono::system_clock> Delta120;
+	float TimeInterval;
 };

@@ -29,6 +29,7 @@ public:
 	void OpenConnection();
 	void CloseConnection();
 	bool SendUsernameForServer(RakNet::RakString username);
+	void SendBackCoord(RakNet::Packet* P);
 private:
 	string IP;
 	int PORT;

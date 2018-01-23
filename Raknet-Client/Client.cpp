@@ -48,8 +48,12 @@ void Client::ClientConnectionUpdate()
 			Connected = true;
 			break;
 		case ID_CONNECTION_LOST:
-			//CONSOLE("Connection lost to server at " << IP);
+			CONSOLE("Connection lost to server at " << IP);
 			Connected = false;
+			break;
+		case PLAYER_COORD:
+			SendBackCoord(Packet);
+			CONSOLE("PLAYER COORD REQUEST RECEIVED");
 			break;
 		}
 	}
@@ -60,7 +64,12 @@ void Client::ClientConnectionUpdate()
 			State = false;
 		}
 	}
-	if (Connected = false){ Sleep(500); Peer->Connect(IP.c_str(), PORT, 0, 0); }
+	if (Connected = false)
+	{
+		Sleep(500); 
+		Peer->Connect(IP.c_str(), PORT, 0, 0);
+	}
+
 }
 
 bool Client::SendUsernameForServer(RakNet::RakString username)
@@ -70,4 +79,11 @@ bool Client::SendUsernameForServer(RakNet::RakString username)
 	BS.Write(username);
 	Peer->Send(&BS, MEDIUM_PRIORITY, RELIABLE_ORDERED, 0, HostAddress, false,0);
 	return true;
+}
+void Client::SendBackCoord(RakNet::Packet* P)
+{
+	RakNet::BitStream bs;
+	bs.Write((MessageID)PLAYER_COORD);
+	bs.Write("20");
+	Peer->Send(&bs, MEDIUM_PRIORITY, RELIABLE_ORDERED, 0, P->systemAddress, false, 0);
 }

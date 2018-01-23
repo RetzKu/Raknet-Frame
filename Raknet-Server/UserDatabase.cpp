@@ -34,7 +34,7 @@ void UserDatabase::RemoveUser(const RakNet::Packet* Packet)
 	}
 }
 
-bool UserDatabase::RegisterGuid(const RakNet::Packet* Packet)
+std::string UserDatabase::RegisterGuid(const RakNet::Packet* Packet)
 {
 	RakNet::BitStream bsIN(Packet->data,Packet->length,false);
 	bsIN.IgnoreBytes(sizeof(RakNet::MessageID));
@@ -44,16 +44,57 @@ bool UserDatabase::RegisterGuid(const RakNet::Packet* Packet)
 	{
 		if (Users[i]->ConnectionID == Packet->guid.ToString())
 		{
-			if (Users[i]->Username == "None")
+			if (Users[i]->Username == Username.C_String())
+			{
+				return "NONE";
+			}
+			else if (Users[i]->Username == "NONE")
 			{
 				Users[i]->Username = Username.C_String();
 			}
-			else if (Users[i]->Username == Username.C_String())
-			{
-				return false;
-			}
-			else { return false; }
+			else { return "NONE"; }
 		}
 	}
-	return true;
+	return Username.C_String();
+}
+
+string UserDatabase::FindUsername(string guid)
+{
+	for each(ClientData* var in Users)
+	{
+		if (var->ConnectionID == guid)
+		{
+			if (var->Username == "NONE")
+			{
+				return "NONE";
+			}
+			else
+			{
+				return var->Username;
+			}
+		}
+	}
+	return "NONE";
+}
+
+string UserDatabase::FindGuid(string username)
+{
+	for each(ClientData* var in Users)
+	{
+		if (var->Username == username)
+		{
+			return var->ConnectionID;
+		}
+	}
+	return "NONE";
+}
+
+vector<string> UserDatabase::GetAllUsers()
+{
+	vector<string> guids;
+	for each(ClientData* var in Users)
+	{
+		guids.push_back(var->ConnectionID);
+	}
+	return guids;
 }

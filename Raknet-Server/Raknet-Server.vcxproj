@@ -139,6 +139,7 @@
   <ItemGroup>
     <ClInclude Include="..\Raknet-Shared\ClientInformation.h" />
     <ClInclude Include="..\Raknet-Shared\MessageCodes.h" />
+    <ClInclude Include="..\Raknet-Shared\UserVariables.h" />
     <ClInclude Include="..\Raknet-Shared\Utility.h" />
     <ClInclude Include="Server.h" />
     <ClInclude Include="UserDatabase.h" />
