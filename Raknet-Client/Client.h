@@ -23,18 +23,20 @@ using namespace std;
 class Client
 {
 public:
-	Client(string Username, string IP, int Port);
+	Client(string IP, int Port);
 	~Client();
-	void ClientConnect();
-	void ClientLoop();
+	void ClientConnectionUpdate();
+	void OpenConnection();
+	void CloseConnection();
+	bool SendUsernameForServer(RakNet::RakString username);
 private:
-	string Username;
 	string IP;
-	int Port;
+	int PORT;
 
+	RakNet::SystemAddress HostAddress;
+	RakNet::RakPeerInterface* Peer = RakNet::RakPeerInterface::GetInstance();
 	RakNet::Packet* Packet;
-	RakNet::SocketDescriptor* SD;
-	RakNet::RakPeerInterface* Peer;
+	RakNet::SocketDescriptor* SD = new RakNet::SocketDescriptor();
 
 	bool Connected = false;
 	bool State = true;

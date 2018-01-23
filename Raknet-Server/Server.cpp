@@ -13,12 +13,14 @@ Server::Server(string IP, int Port)
 	this->IP = IP;
 	this->Port = Port;
 	Peer = RakPeerInterface::GetInstance();
+	Connections = new UserDatabase();
 	ServerStart();
 }
 
 Server::~Server()
 {
 	delete SD;
+	delete Connections;
 }
 
 void Server::ServerStart()
@@ -40,23 +42,26 @@ void Server::ServerLoop()
 
 	while (State)
 	{
-		RakNet::BitStream bsIN;
+		/*Loads packet from peer*/
 		for (Packet = Peer->Receive(); Packet; Peer->DeallocatePacket(Packet), Packet = Peer->Receive())
 		{
-			RakNet::BitStream bsIN(Packet->data, Packet->length, false);
-
+			/*Switch case that lets us check what kind of packet it was*/
 			switch (Packet->data[0])
 			{
 			case ID_NEW_INCOMING_CONNECTION:
-				Connections.push_back(new ClientData(std::chrono::system_clock::now(),Packet->guid.ToString()));
-				CONSOLE(Packet->guid.ToString() << " Connecting to server");
+				Connections->ConnectUser(Packet);
+				CONSOLE(Packet->guid.ToString() << " Connected to server");
+				break;
+			case USERNAME_FOR_GUID:
+				CONSOLE(Packet->guid.ToString() << " gave an username");
+				Connections->RegisterGuid(Packet);
 				break;
 			case ID_CONNECTION_LOST:
+				Connections->RemoveUser(Packet);
 				CONSOLE(Packet->guid.ToString() << " Connection lost");
 				break;
 			}
 		}
-
 		if (GetConsoleWindow() == GetForegroundWindow())
 		{
 			if (GetAsyncKeyState(VK_ESCAPE) == -32767)
@@ -67,3 +72,4 @@ void Server::ServerLoop()
 	}
 	RakPeerInterface::DestroyInstance(Peer);
 }
+

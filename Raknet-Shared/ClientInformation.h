@@ -9,6 +9,7 @@ struct ClientData
 	ClientData(chrono::system_clock::time_point ConnectionTimestamp, string ConnectionID) {
 		this->ConnectionTimestamp = ConnectionTimestamp;
 		this->ConnectionID = ConnectionID;
+		this->Username = "None";
 	}
 	chrono::system_clock::time_point ConnectionTimestamp;
 	string ConnectionID;

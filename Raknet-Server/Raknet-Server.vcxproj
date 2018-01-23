@@ -134,12 +134,14 @@
   <ItemGroup>
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Server.cpp" />
+    <ClCompile Include="UserDatabase.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Raknet-Shared\ClientInformation.h" />
     <ClInclude Include="..\Raknet-Shared\MessageCodes.h" />
     <ClInclude Include="..\Raknet-Shared\Utility.h" />
     <ClInclude Include="Server.h" />
+    <ClInclude Include="UserDatabase.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

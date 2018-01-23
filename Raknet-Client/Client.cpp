@@ -3,77 +3,71 @@
 using namespace RakNet;
 using namespace std;
 
-Client::Client(string Username, string IP, int Port)
+#define CONSOLE(x) cout << x << endl;
+
+Client::Client(string IP, int Port)
 {
-	this->Username = Username;
+	
 	this->IP = IP;
-	this->Port = Port;
+	this->PORT = Port;
 
 	string title = "Raknet-Client";
 	SetConsoleTitle(title.c_str());
-
-	ClientConnect();
 }
 
 Client::~Client()
 {
+	delete SD;
 }
 
-void Client::ClientConnect()
+void Client::CloseConnection()
+{
+	RakPeerInterface::DestroyInstance(Peer);
+}
+
+/*Does simple setup for client connection*/
+void Client::OpenConnection()
 {
 	Peer = RakPeerInterface::GetInstance();
-	SocketDescriptor SD;
-	Peer->Startup(1, &SD, 1);
-	this->SD = &SD;
+
+	Peer->Startup(1, SD, 1);
 	Peer->SetOccasionalPing(true);
-	char ip[512];
-	strcpy_s(ip, IP.c_str());
-	Peer->Connect(ip, Port, 0, 0);
-	CONSOLE("Client connection starting")
-	ClientLoop();
+
+	Peer->Connect(IP.c_str(),PORT, 0, 0);
 }
 
-void Client::ClientLoop()
+void Client::ClientConnectionUpdate()
 {
-	char ip[512];
-	strcpy_s(ip, IP.c_str());
-	//BitStream bsIN(Packet->data, Packet->length, false);
-
-	while (State)
+	for (Packet = Peer->Receive(); Packet; Peer->DeallocatePacket(Packet), Packet = Peer->Receive())
 	{
-		if (Connected = false){ Sleep(500); Peer->Connect(ip, Port, 0, 0); }
-		for (Packet = Peer->Receive(); Packet; Peer->DeallocatePacket(Packet), Packet = Peer->Receive())
+		switch (Packet->data[0])
 		{
-			switch (Packet->data[0])
-			{
-			case ID_REMOTE_DISCONNECTION_NOTIFICATION:
-				printf("Another client has disconnected.\n");
-				break;
-			case ID_REMOTE_CONNECTION_LOST:
-				printf("Another client has lost the connection.\n");
-				break;
-			case ID_REMOTE_NEW_INCOMING_CONNECTION:
-				printf("Another client has connected.\n");
-				break;
-			case ID_CONNECTION_REQUEST_ACCEPTED:
-				std::cout << "Connection was accepted\n";
-				Connected = true;
-				//HOST_ADD = packet->systemAddress;
-				break;
-			case ID_CONNECTION_LOST:
-				printf("Connection lost");
-				Connected = false;
-				break;
-
-			}
-		}
-		if (GetConsoleWindow() == GetForegroundWindow())
-		{
-			if (GetAsyncKeyState(VK_ESCAPE) == -32767)
-			{
-				State = false;
-			}
+		case ID_CONNECTION_REQUEST_ACCEPTED:
+			HostAddress = Packet->systemAddress;
+			CONSOLE("Connection with server at " << IP << " was succesfull");
+			Connected = true;
+			break;
+		case ID_CONNECTION_LOST:
+			//CONSOLE("Connection lost to server at " << IP);
+			Connected = false;
+			break;
 		}
 	}
-	RakPeerInterface::DestroyInstance(Peer);
+	if (GetConsoleWindow() == GetForegroundWindow())
+	{
+		if (GetAsyncKeyState(VK_ESCAPE) == -32767)
+		{
+			State = false;
+		}
+	}
+	if (Connected = false){ Sleep(500); Peer->Connect(IP.c_str(), PORT, 0, 0); }
+}
+
+bool Client::SendUsernameForServer(RakNet::RakString username)
+{
+	RakNet::BitStream BS;
+	BS.Write((RakNet::MessageID)USERNAME_FOR_GUID);
+	BS.Write(username);
+	Peer->Send(&BS, MEDIUM_PRIORITY, RELIABLE_ORDERED, 0, HostAddress, false,0);
+	return true;
 }

@@ -6,7 +6,7 @@
 #include <sstream>
 
 #include "MessageCodes.h"
-#include "ClientInformation.h"
+#include "UserDatabase.h"
 //#include "Utility.h"
 
 /*Including basic raknet headeres*/
@@ -34,8 +34,7 @@ private:
 	RakNet::BitStream bsIN;
 	RakNet::BitStream bsOUT;
 
-	vector<ClientData*> Connections;
-
+	UserDatabase* Connections;
 
 	string IP;
 	int Port;
