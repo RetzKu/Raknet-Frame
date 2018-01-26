@@ -6,6 +6,8 @@ using namespace std;
 
 #define PORT 60000
 
+void readpackage(const RakNet::Packet& Packet);
+
 Server::Server(string IP, int Port)
 {
 	string title = "Raknet-Server";
@@ -30,7 +32,7 @@ void Server::ServerStart()
 	CONSOLE("Starting server at port " << Port);
 	
 	 Delta120 = chrono::system_clock::now();
-	 TimeInterval = (int)((1.0 / 30) * 1000);
+	 TimeInterval = (int)((1.0 / 120) * 1000);
 }
 
 void Server::ServerStop()
@@ -55,7 +57,7 @@ void Server::ServerUpdate()
 	}
 }
 
-void Server::CheckPacket(const RakNet::Packet P)
+void Server::CheckPacket(const RakNet::Packet& P)
 {
 	switch (P.data[0])
 	{
@@ -66,15 +68,41 @@ void Server::CheckPacket(const RakNet::Packet P)
 	case USERNAME_FOR_GUID:
 		Result = Connections->RegisterGuid(Packet);
 		CONSOLE(Packet->guid.ToString() << " gave an username " << Result);
+		SendResponse(Packet->systemAddress, LOGIN_ACCEPTED);
 		break;
 	case ID_CONNECTION_LOST:
 		Connections->RemoveUser(Packet);
 		CONSOLE(Packet->guid.ToString() << " Connection lost");
 		break;
 	case PLAYER_COORD:
+		readpackage(P);
 		CONSOLE("Handle Player coord that was requested");
 		break;
+
 	}
+}
+
+void readpackage(const RakNet::Packet& Packet)
+{
+	RakNet::BitStream bs(Packet.data, Packet.length, 0);
+	bs.IgnoreBytes(sizeof(RakNet::MessageID));
+	RakString x, y;
+	bs.Read(x);
+	bs.Read(y);
+	CONSOLE("PEILAAJAN UUDET SIJAINNIT! X:" << x << " Y:" << y);
+}
+
+void Server::BroadcastVar(CustomMessages Var, RakNet::Packet Packet)
+{
+	RakNet::BitStream bs(Packet.data,Packet.length,false);
+	Peer->Send(&bs, MEDIUM_PRIORITY, RELIABLE_ORDERED, 0, Packet.systemAddress, true, 0);
+}
+
+void Server::SendResponse(RakNet::SystemAddress sys, CustomMessages responseID)
+{
+	RakNet::BitStream bs;
+	bs.Write((MessageID)LOGIN_ACCEPTED);
+	Peer->Send(&bs, MEDIUM_PRIORITY, RELIABLE_ORDERED, 0, sys, false, 0);
 }
 
 bool Server::AskForVariable(CustomMessages var, INT64 guid)
@@ -102,12 +130,16 @@ bool Server::AskForVariable(CustomMessages var, string username)
 
 void Server::RequestFromAll(CustomMessages Requested)
 {
-	vector<string> guids = Connections->GetAllUsers();
-	INT64 guidint;
-	for each(string var in guids)
-	{
-		guidint = stoll(var);
-		AskForVariable(Requested, guidint);
-	}
+	RakNet::BitStream bs;
+	bs.Write((RakNet::MessageID)Requested);
+	Peer->Send(&bs, MEDIUM_PRIORITY, RELIABLE_ORDERED, 0, UNASSIGNED_SYSTEM_ADDRESS, true, 0);
+
+	//vector<string> guids = Connections->GetAllUsers();
+	//INT64 guidint;
+	//for (string& var : guids)
+	//{
+	//	guidint = stoll(var);
+	//	AskForVariable(Requested, guidint);
+	//}
 }
 

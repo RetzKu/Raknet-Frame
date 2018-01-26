@@ -21,18 +21,6 @@ void UserDatabase::ConnectUser(const RakNet::Packet* Packet)
 	Users.push_back(tmp);
 }
 
-RakNet::SystemAddress UserDatabase::FindSystemAddress(string guid)
-{
-	for (ClientData* var : Users)
-	{
-		if (var->ConnectionID == guid)
-		{
-			return var->Address;
-		}
-	}
-	return NULL;
-}
-
 void UserDatabase::RemoveUser(const RakNet::Packet* Packet)
 {
 	assert(Users.empty() == false);

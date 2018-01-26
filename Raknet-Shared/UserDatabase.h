@@ -18,7 +18,6 @@ public:
 	string RegisterGuid(const RakNet::Packet* Packet);
 	string FindUsername(string guid);
 	string FindGuid(string username);
-	RakNet::SystemAddress FindSystemAddress(string guid);
 	vector<string> GetAllUsers();
 
 private:

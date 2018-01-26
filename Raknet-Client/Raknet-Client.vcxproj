@@ -145,14 +145,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\Raknet-Server\UserDatabase.cpp" />
     <ClCompile Include="Client.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Player.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Raknet-Server\UserDatabase.h" />
     <ClInclude Include="..\Raknet-Shared\ClientInformation.h" />
     <ClInclude Include="..\Raknet-Shared\MessageCodes.h" />
     <ClInclude Include="..\Raknet-Shared\Utility.h" />
     <ClInclude Include="Client.h" />
+    <ClInclude Include="Player.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

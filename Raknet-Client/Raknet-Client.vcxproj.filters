@@ -24,6 +24,12 @@
     <ClCompile Include="Client.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\Raknet-Server\UserDatabase.cpp">
+      <Filter>Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Raknet-Shared\MessageCodes.h">
@@ -37,6 +43,12 @@
     </ClInclude>
     <ClInclude Include="..\Raknet-Shared\Utility.h">
       <Filter>Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Raknet-Server\UserDatabase.h">
+      <Filter>Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

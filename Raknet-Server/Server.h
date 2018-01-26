@@ -29,10 +29,12 @@ public:
 	void ServerStart();
 	void ServerStop();
 	void ServerUpdate();
-	void CheckPacket(const RakNet::Packet P);
+	void CheckPacket(const RakNet::Packet& P);
 	bool AskForVariable(CustomMessages var, INT64 guid);
 	bool AskForVariable(CustomMessages var, string username);
 	void RequestFromAll(CustomMessages var);
+	void SendResponse(RakNet::SystemAddress sys, CustomMessages responseID);
+	void BroadcastVar(CustomMessages Var, RakNet::Packet Packet);
 
 private:
 	RakNet::Packet* Packet;
