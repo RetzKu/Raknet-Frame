@@ -7,6 +7,7 @@
 #include <sstream>
 #include <thread>
 #include <vector>
+#include <chrono>
 
 #include "MessageCodes.h"
 #include "ClientInformation.h"
@@ -21,41 +22,65 @@
 #define CONSOLE(x) std::cout << x << std::endl;
 
 
-typedef struct
-{
-	std::vector<string*> Values;
-	CustomMessages MessageID;
-}Var;
+
+
+//typedef struct
+//{
+//	std::vector<float*> Values;
+//	CustomMessages MessageID;
+//}Var;
+//
+//typedef struct
+//{
+//	std::vector<string*> Values;
+//	CustomMessages MessageID;
+//}Var;
 
 using namespace std;
 
 class Client
 {
+/*PUBLIC FUNCTIONS*/
 public:
 	Client(string IP, int Port,const char* username);
 	~Client();
-	void ClientConnectionUpdate();
+	void Update();
 	void OpenConnection();
 	void CloseConnection();
 	bool SendUsernameForServer(RakNet::RakString username);
 	void SendBackCoord(RakNet::Packet* P);
 	RakNet::RakString GetUsername() { return RakNet::RakString(username);}
-	void SetVar(CustomMessages MessageID, std::vector<string*> Vars);
-	std::vector<Var> Vars;
+	void UsernameChange();
 	void CheckForVar(CustomMessages messageID);
+	void SetVar(CustomMessages MessageID, std::vector<string*> Vars);
+	void SetVar(CustomMessages MessageID, std::vector<float*>Vars);
+	void SetVar(CustomMessages MessageID, std::vector<int*>Vars);
 
+/*PRIVATE FUNCTIONS*/
+private:
+	void ClientConnectionUpdate(RakNet::Packet* Packet);
+
+/*PUBLIC VARIABLES*/
+public:
 	bool Connected = false;
 	bool LoggedIn = false;
-private:
 	string IP;
-	int PORT;
+	int SERVER_PORT;
 	const char* username;
+	bool State = true;
+	vector<Var<int>>IntVars;
+	vector<Var<string>> StringVars;
+	vector<Var<float>> FloatVars;
+	std::thread BackupThread;
+/*PRIVATE VARIABLES*/
+private:
 
 	RakNet::SystemAddress HostAddress;
 	RakNet::RakPeerInterface* Peer = RakNet::RakPeerInterface::GetInstance();
 	RakNet::Packet* Packet;
-	RakNet::SocketDescriptor* SD = new RakNet::SocketDescriptor();
+	RakNet::SocketDescriptor* SD = new RakNet::SocketDescriptor(0,0);
 
-	bool State = true;
+	std::chrono::system_clock::time_point Delta;
+	float TimeInterval;
 };
 

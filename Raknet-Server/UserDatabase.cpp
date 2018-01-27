@@ -52,19 +52,15 @@ std::string UserDatabase::RegisterGuid(const RakNet::Packet* Packet)
 	bsIN.IgnoreBytes(sizeof(RakNet::MessageID));
 	RakNet::RakString Username;
 	bsIN.Read(Username);
-	for (int i = 0; i < Users.size(); i++)
+	for (ClientData* var : Users)
 	{
-		if (Users[i]->ConnectionID == Packet->guid.ToString())
+		if (var->Username == Username.C_String())
 		{
-			if (Users[i]->Username == Username.C_String())
-			{
-				return "NONE";
-			}
-			else if (Users[i]->Username == "NONE")
-			{
-				Users[i]->Username = Username.C_String();
-			}
-			else { return "NONE"; }
+			return "NONE";
+		}
+		else if (var->Address == Packet->systemAddress)
+		{
+			var->Username = Username.C_String();
 		}
 	}
 	return Username.C_String();

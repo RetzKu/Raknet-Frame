@@ -2,7 +2,7 @@
 
 
 
-Player::Player(std::string x, std::string y)
+Player::Player(float x, float y)
 {
 	this->x = x;
 	this->y = y;

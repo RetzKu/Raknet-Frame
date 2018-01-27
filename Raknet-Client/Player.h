@@ -4,8 +4,8 @@
 class Player
 {
 public:
-	Player(std::string x, std::string y);
+	Player(float x, float y);
 	~Player();
-	std::string x, y;
+	float x, y;
 };
 

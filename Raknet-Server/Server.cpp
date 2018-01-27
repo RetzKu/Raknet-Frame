@@ -32,7 +32,7 @@ void Server::ServerStart()
 	CONSOLE("Starting server at port " << Port);
 	
 	 Delta120 = chrono::system_clock::now();
-	 TimeInterval = (int)((1.0 / 120) * 1000);
+	 TimeInterval = (int)((1.0 / 60) * 1000);
 }
 
 void Server::ServerStop()
@@ -68,7 +68,8 @@ void Server::CheckPacket(const RakNet::Packet& P)
 	case USERNAME_FOR_GUID:
 		Result = Connections->RegisterGuid(Packet);
 		CONSOLE(Packet->guid.ToString() << " gave an username " << Result);
-		SendResponse(Packet->systemAddress, LOGIN_ACCEPTED);
+		if (Result != "NONE") {SendResponse(Packet->systemAddress, LOGIN_ACCEPTED);}
+		else {SendResponse(Packet->systemAddress, LOGIN_FAILED); }
 		break;
 	case ID_CONNECTION_LOST:
 		Connections->RemoveUser(Packet);
@@ -86,7 +87,7 @@ void readpackage(const RakNet::Packet& Packet)
 {
 	RakNet::BitStream bs(Packet.data, Packet.length, 0);
 	bs.IgnoreBytes(sizeof(RakNet::MessageID));
-	RakString x, y;
+	float x, y;
 	bs.Read(x);
 	bs.Read(y);
 	CONSOLE("PEILAAJAN UUDET SIJAINNIT! X:" << x << " Y:" << y);
@@ -101,7 +102,7 @@ void Server::BroadcastVar(CustomMessages Var, RakNet::Packet Packet)
 void Server::SendResponse(RakNet::SystemAddress sys, CustomMessages responseID)
 {
 	RakNet::BitStream bs;
-	bs.Write((MessageID)LOGIN_ACCEPTED);
+	bs.Write((MessageID)responseID);
 	Peer->Send(&bs, MEDIUM_PRIORITY, RELIABLE_ORDERED, 0, sys, false, 0);
 }
 

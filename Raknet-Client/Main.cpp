@@ -8,22 +8,21 @@
 int main()
 {
 	Client* Connection = new Client("127.0.0.1", 60000,"Loyalisti");
+	Player* Pelaaja = new Player(20, 20); //Temporary player class that keeps player coors for internal testing
+
+	std::vector<float*> PelaajaCoords;
+	PelaajaCoords.push_back(&Pelaaja->x);
+	PelaajaCoords.push_back(&Pelaaja->y);
+	Connection->SetVar(PLAYER_COORD,PelaajaCoords); //save 2float pointers under player_coord enum.
+
 
 	Connection->OpenConnection();
-	Player* Pelaaja = new Player("20", "20");
-	std::vector<string*> Sijainnit;
-
-	Sijainnit.push_back(&Pelaaja->x);
-	Sijainnit.push_back(&Pelaaja->y);
-	
-	Connection->SetVar(PLAYER_COORD, Sijainnit);
-
 	bool Running = true;
 	while (Running)
 	{
-		Pelaaja->x = std::to_string(rand() % 50+50);
-		Pelaaja->y = std::to_string(rand() % 50);
-		Connection->ClientConnectionUpdate();
+		Pelaaja->x = rand() % 50 + 50;
+		Pelaaja->y = rand() % 50;
+		Connection->Update();
 	}
 	Connection->CloseConnection();
 	delete Connection;

@@ -9,7 +9,7 @@ Client::Client(string IP, int Port, const char* username)
 {
 	
 	this->IP = IP;
-	this->PORT = Port;
+	this->SERVER_PORT = Port;
 	this->username = username;
 	string title = "Raknet-Client";
 	SetConsoleTitle(title.c_str());
@@ -30,79 +30,144 @@ void Client::OpenConnection()
 {
 	Peer = RakPeerInterface::GetInstance();
 
-	Peer->Startup(1, SD, 1);
+	Peer->Startup(8, SD, 1);
 	Peer->SetOccasionalPing(true);
+	Peer->Connect(IP.c_str(),SERVER_PORT, 0, 0);
 
-	Peer->Connect(IP.c_str(),PORT, 0, 0);
+	std::thread(&Client::UsernameChange, this).detach();
+	Delta = chrono::system_clock::now();
+	TimeInterval = (int)((1.0 / 60) * 1000);
 }
 
-void Client::ClientConnectionUpdate()
+void Client::Update()
 {
-	for (Packet = Peer->Receive(); Packet; Peer->DeallocatePacket(Packet), Packet = Peer->Receive())
+	auto TimeDifference = chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now() - Delta);
+	/*Loads packet from peer*/
+	if ((float)TimeDifference.count() > TimeInterval)
 	{
-		switch (Packet->data[0])
+		Delta += chrono::milliseconds((int)TimeInterval);
+		for (Packet = Peer->Receive(); Packet; Peer->DeallocatePacket(Packet), Packet = Peer->Receive())
 		{
-		case ID_CONNECTION_REQUEST_ACCEPTED:
-			HostAddress = Packet->systemAddress;
-			CONSOLE("Connection with server at " << IP << " was succesful");
-			Connected = true;
-			break;
-		case ID_CONNECTION_LOST:
-			CONSOLE("Connection lost to server at " << IP);
-			Connected = false;
-			break;
-		case PLAYER_COORD:
-			CheckForVar(PLAYER_COORD);
-			CONSOLE("PLAYER COORD REQUEST RECEIVED");
-			break;
-		case PLAYER_COORD_UPDATE:
-			CONSOLE("RECEIVED NEW COORDS FOR GUID" << Packet->guid.ToString());
-			break;
-		case LOGIN_ACCEPTED:
-			CONSOLE("Server accepted our username");
-			LoggedIn = true;
-			break;
+			/*Switch case that lets us check what kind of packet it was*/
+			ClientConnectionUpdate(Packet);
 		}
 	}
-	if (Connected == false)
+}
+
+void Client::ClientConnectionUpdate(RakNet::Packet* Packet)
+{
+	switch (Packet->data[0])
 	{
-		Peer->Connect(IP.c_str(), PORT, 0, 0);
-		Sleep(500); 
+	case ID_CONNECTION_REQUEST_ACCEPTED:
+		HostAddress = Packet->systemAddress;
+		CONSOLE("Connection with server at " << IP << " was succesful");
+		Connected = true;
+		break;
+	case ID_CONNECTION_LOST:
+		CONSOLE("Connection lost to server at " << IP);
+		Connected = false;
+		break;
+	case PLAYER_COORD:
+		CheckForVar(PLAYER_COORD);
+		CONSOLE("PLAYER COORD REQUEST RECEIVED");
+		break;
+	case PLAYER_COORD_UPDATE:
+		CONSOLE("RECEIVED NEW COORDS FOR GUID" << Packet->guid.ToString());
+		break;
+	case LOGIN_ACCEPTED:
+		CONSOLE("Server accepted our username");
+		LoggedIn = true;
+		break;
+	case LOGIN_FAILED:
+		CONSOLE("Server did not accept our username");
+		thread(&Client::UsernameChange, this).detach();
+		LoggedIn = false;
+		break;
 	}
-	if (!LoggedIn)
-	{
-		RakNet::RakString username = GetUsername();
-		SendUsernameForServer(username);
-		Sleep(500);
-	}
+}
+
+void Client::UsernameChange()
+{
+	using namespace chrono_literals;
+	std::this_thread::sleep_for(1s);
+	std::string newusername;
+	std::cout << "Anna username :";
+	cin >> newusername;
+	username = newusername.c_str();
+	
+	RakNet::BitStream bs;
+	bs.Write((RakNet::MessageID)USERNAME_FOR_GUID);
+	bs.Write(username);
+	Peer->Send(&bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, HostAddress, false, 0);
 }
 
 void Client::CheckForVar(CustomMessages messageID)
 {
 	RakNet::BitStream bs;
 	bs.Write((RakNet::MessageID)messageID);
-
-	for (Var tmp : this->Vars)
+	bool wasregisted = false;
+	for (Var<int> var : IntVars)
 	{
-		if (tmp.MessageID == messageID)
+		if (var.MessageID == messageID) 
 		{
-			for (string* value : tmp.Values)
+			wasregisted = true;
+			for (int* i : var.Values)
 			{
-				string as = *value;
-				RakNet::RakString asr(as.c_str());
-				bs.Write(asr);
+				bs.Write(*i);
 			}
-			Peer->Send(&bs, MEDIUM_PRIORITY, RELIABLE_ORDERED, 0, HostAddress, false, 0);
 		}
+	}
+	for (Var<std::string> var : StringVars)
+	{
+		if (var.MessageID == messageID) 
+		{
+			wasregisted = true;
+			for (std::string* i : var.Values)
+			{
+				bs.Write(*i);
+			}
+		}
+	}
+	for (Var<float> var : FloatVars)
+	{
+		if (var.MessageID == messageID) 
+		{
+			wasregisted = true;
+			for (float* i : var.Values)
+			{
+				bs.Write(*i);
+			}
+		}
+	}
+	if (wasregisted == true)
+	{
+		Peer->Send(&bs, MEDIUM_PRIORITY, RELIABLE_ORDERED, 0, HostAddress, false, 0);
 	}
 }
 
-void Client::SetVar(CustomMessages MessageID, std::vector<string*> Vars)
+void Client::SetVar(CustomMessages MessageID, std::vector<int*> Vars)
 {
-	Var tmp;
+	Var<int> tmp;
+	tmp.type = Type::INT_TYPE;
 	tmp.MessageID = MessageID;
 	tmp.Values = Vars;
-	this->Vars.push_back(tmp);
+	this->IntVars.push_back(tmp);
+}
+void Client::SetVar(CustomMessages MessageID, std::vector<float*> Vars)
+{
+	Var<float> tmp;
+	tmp.type = Type::FLOAT_TYPE;
+	tmp.MessageID = MessageID;
+	tmp.Values = Vars;
+	this->FloatVars.push_back(tmp);
+}
+void Client::SetVar(CustomMessages MessageID, std::vector<string*> Vars)
+{
+	Var<string> tmp;
+	tmp.type = Type::STRING_TYPE;
+	tmp.Values = Vars;
+	tmp.MessageID = MessageID;
+	this->StringVars.push_back(tmp);
 }
 
 bool Client::SendUsernameForServer(RakNet::RakString username)
