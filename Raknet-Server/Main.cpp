@@ -14,11 +14,6 @@ int main()
 			{
 				Running = false;
 			}
-			if (GetAsyncKeyState(0x49) == -32767)
-			{
-				//Connection->AskForVariable(CustomMessages::PLAYER_COORD, "Loyalisti");
-				Connection->RequestFromAll(CustomMessages::PLAYER_COORD);
-			}
 		}
 	}
 	delete Connection;

@@ -22,7 +22,7 @@
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{8CC6A76F-EBFE-4C69-84DA-3BBBBDF95A45}</ProjectGuid>
     <RootNamespace>RaknetClient</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -145,16 +145,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\Raknet-Server\UserDatabase.cpp" />
     <ClCompile Include="Client.cpp" />
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="Player.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Raknet-Server\UserDatabase.h" />
     <ClInclude Include="..\Raknet-Shared\ClientInformation.h" />
     <ClInclude Include="..\Raknet-Shared\MessageCodes.h" />
-    <ClInclude Include="..\Raknet-Shared\Utility.h" />
     <ClInclude Include="Client.h" />
     <ClInclude Include="Player.h" />
   </ItemGroup>

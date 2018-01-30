@@ -66,6 +66,8 @@ void Client::ClientConnectionUpdate(RakNet::Packet* Packet)
 	case ID_CONNECTION_LOST:
 		CONSOLE("Connection lost to server at " << IP);
 		Connected = false;
+		LoggedIn = false;
+		thread(&Client::RetryConnection, this).detach();
 		break;
 	case PLAYER_COORD:
 		CheckForVar(PLAYER_COORD);
@@ -83,7 +85,23 @@ void Client::ClientConnectionUpdate(RakNet::Packet* Packet)
 		thread(&Client::UsernameChange, this).detach();
 		LoggedIn = false;
 		break;
+	case USERNAME:
+		CheckForVar(USERNAME);
+		CONSOLE("Server is asking for username");
+		break;
 	}
+}
+
+void Client::RetryConnection()
+{
+	using namespace chrono_literals;
+	while (Connected == false)
+	{
+		CONSOLE("RETRYING CONNECTION");
+		Peer->Connect(IP.c_str(),SERVER_PORT, 0, 0);
+		this_thread::sleep_for(10s);
+	}
+	thread(&Client::UsernameChange, this).detach();
 }
 
 void Client::UsernameChange()

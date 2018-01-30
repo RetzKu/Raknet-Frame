@@ -6,8 +6,6 @@ using namespace std;
 
 #define PORT 60000
 
-void readpackage(const RakNet::Packet& Packet);
-
 Server::Server(string IP, int Port)
 {
 	string title = "Raknet-Server";
@@ -75,22 +73,7 @@ void Server::CheckPacket(const RakNet::Packet& P)
 		Connections->RemoveUser(Packet);
 		CONSOLE(Packet->guid.ToString() << " Connection lost");
 		break;
-	case PLAYER_COORD:
-		readpackage(P);
-		CONSOLE("Handle Player coord that was requested");
-		break;
-
 	}
-}
-
-void readpackage(const RakNet::Packet& Packet)
-{
-	RakNet::BitStream bs(Packet.data, Packet.length, 0);
-	bs.IgnoreBytes(sizeof(RakNet::MessageID));
-	float x, y;
-	bs.Read(x);
-	bs.Read(y);
-	CONSOLE("PEILAAJAN UUDET SIJAINNIT! X:" << x << " Y:" << y);
 }
 
 void Server::BroadcastVar(CustomMessages Var, RakNet::Packet Packet)
@@ -134,13 +117,5 @@ void Server::RequestFromAll(CustomMessages Requested)
 	RakNet::BitStream bs;
 	bs.Write((RakNet::MessageID)Requested);
 	Peer->Send(&bs, MEDIUM_PRIORITY, RELIABLE_ORDERED, 0, UNASSIGNED_SYSTEM_ADDRESS, true, 0);
-
-	//vector<string> guids = Connections->GetAllUsers();
-	//INT64 guidint;
-	//for (string& var : guids)
-	//{
-	//	guidint = stoll(var);
-	//	AskForVariable(Requested, guidint);
-	//}
 }
 

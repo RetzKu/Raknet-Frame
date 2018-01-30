@@ -21,18 +21,6 @@ void UserDatabase::ConnectUser(const RakNet::Packet* Packet)
 	Users.push_back(tmp);
 }
 
-RakNet::SystemAddress UserDatabase::FindSystemAddress(string guid)
-{
-	for (ClientData* var : Users)
-	{
-		if (var->ConnectionID == guid)
-		{
-			return var->Address;
-		}
-	}
-	return NULL;
-}
-
 void UserDatabase::RemoveUser(const RakNet::Packet* Packet)
 {
 	assert(Users.empty() == false);
@@ -52,15 +40,19 @@ std::string UserDatabase::RegisterGuid(const RakNet::Packet* Packet)
 	bsIN.IgnoreBytes(sizeof(RakNet::MessageID));
 	RakNet::RakString Username;
 	bsIN.Read(Username);
-	for (ClientData* var : Users)
+	for (int i = 0; i < Users.size(); i++)
 	{
-		if (var->Username == Username.C_String())
+		if (Users[i]->ConnectionID == Packet->guid.ToString())
 		{
-			return "NONE";
-		}
-		else if (var->Address == Packet->systemAddress)
-		{
-			var->Username = Username.C_String();
+			if (Users[i]->Username == Username.C_String())
+			{
+				return "NONE";
+			}
+			else if (Users[i]->Username == "NONE")
+			{
+				Users[i]->Username = Username.C_String();
+			}
+			else { return "NONE"; }
 		}
 	}
 	return Username.C_String();
