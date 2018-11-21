@@ -39,6 +39,49 @@ void Client::OpenConnection()
 	TimeInterval = (int)((1.0 / 60) * 1000);
 }
 
+void Client::OpenPatcher()
+{
+	RakNet::AutopatcherClient autopatcherClient;
+	RakNet::FileListTransfer filetransferList;
+	autopatcherClient.SetFileListTransferPlugin(&filetransferList);
+
+	RakNet::PacketizedTCP packetizedTCP;
+	if (packetizedTCP.Start(SERVER_PORT, 1) == false)
+	{
+		std::cout << "Failed to startup autopatcher server" << std::endl;
+	}
+	packetizedTCP.AttachPlugin(&autopatcherClient);
+	packetizedTCP.AttachPlugin(&filetransferList);
+
+	char buffer[512];
+	Gets(buffer, sizeof(buffer));
+	strcpy(buffer, "127.0.0.1");
+
+	packetizedTCP.Connect(buffer, SERVER_PORT, false);
+
+	char appDir[512];
+	Gets(appDir, sizeof(appDir));
+	strcpy(appDir, "C:/Users/MikaKau/Downloads/");
+
+	char appName[512];
+	Gets(appName, sizeof(appName));
+	strcpy(appName, "testAPP");
+
+	char ch;
+	RakNet::Packet *p;
+	while (1)
+	{
+		RakNet::SystemAddress notifAddress;
+		notifAddress = packetizedTCP.HasCompletedConnectionAttempt();
+		if (notifAddress != RakNet::UNASSIGNED_SYSTEM_ADDRESS)
+		{
+			std::cout << "Connection to patcher server accepted" << std::endl;
+			HostAddress = notifAddress;
+		}
+
+	}
+}
+
 void Client::Update()
 {
 	auto TimeDifference = chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now() - Delta);

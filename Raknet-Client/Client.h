@@ -18,6 +18,16 @@
 #include <Raknet\MessageIdentifiers.h>
 #include <Raknet\RakNetTypes.h>
 #include <Raknet\BitStream.h>
+#include <Raknet/PacketizedTCP.h>
+
+/*Autopatcher includes*/
+#include <Raknet/Extra/Autopatcher/AutopatcherClient.h>
+#include <Raknet/Extra/Autopatcher/AutopatcherServer.h>
+#include <Raknet/FileListTransfer.h>
+#include <Raknet/AutopatcherPatchContext.h>
+#include <Raknet/FileListTransferCBInterface.h>
+#include <Raknet/Gets.h>
+#include <Raknet/RakSleep.h>
 
 #define CONSOLE(x) std::cout << x << std::endl;
 
@@ -46,6 +56,7 @@ public:
 	~Client();
 	void Update();
 	void OpenConnection();
+	void OpenPatcher();
 	void CloseConnection();
 	void RetryConnection();
 	bool SendUsernameForServer(RakNet::RakString username);
